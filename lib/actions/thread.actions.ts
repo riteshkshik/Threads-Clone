@@ -1,4 +1,4 @@
-"use server"
+"use server";
 
 import { revalidatePath } from "next/cache";
 import Thread from "../models/thread.model";
@@ -34,6 +34,76 @@ export async function createThread({
 
     revalidatePath(path);
   } catch (error: any) {
-    throw new Error(`Error creating thread ${error.message}`)
+    throw new Error(`Error creating thread ${error.message}`);
+  }
+}
+
+export async function fetchPost(pageNumber = 1, pageSize = 20) {
+  connectToDB();
+
+  //calculate no of posts to skip
+  const skipAmount = (pageNumber - 1) * pageSize;
+
+  // fetch posts that have no parents
+  const postsQuery = Thread.find({ parentId: { $in: [null, undefined] } })
+    .sort({ createdAt: "desc" })
+    .skip(skipAmount)
+    .limit(pageSize)
+    .populate({ path: "author", model: User })
+    .populate({
+      path: "children",
+      populate: {
+        // here recursive call will make the comments to fetch out
+        path: "author",
+        model: User,
+        select: "_id name parentId image",
+      },
+    });
+
+  const totalPostsCount = await Thread.countDocuments({
+    parentId: { $in: [null, undefined] },
+  });
+
+  const posts = await postsQuery.exec();
+
+  const isNext = totalPostsCount > skipAmount + posts.length;
+
+  return { posts, isNext };
+}
+
+export async function fetchThreadById(id: string){
+  connectToDB();
+
+  try {
+    // TODO: Populate Community
+    const thread = await Thread.findById(id)
+    .populate({
+      path: 'author',
+      model: User,
+      select: '_id id name image'
+    })
+    .populate({
+      path: 'children',
+      populate: [
+        {
+          path: 'author',
+          model: User,
+          select: '_id id name parentId image'
+        },
+        {
+          path: 'children',
+          model: Thread,
+          populate: {
+            path: 'author',
+            model: User,
+            select: '_id id name parentId image'
+          }
+        }
+      ]
+    }).exec();
+
+    return thread;
+  } catch (error) {
+    throw new Error(`Error Fetching Thread: ${error.message}`)
   }
 }
