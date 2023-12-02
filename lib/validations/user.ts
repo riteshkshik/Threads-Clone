@@ -16,5 +16,5 @@ export const UserValidation = z.object({
   bio: z
     .string()
     .min(3, { message: "Bio Should Be Larger Than 3 Character!" })
-    .max(30, { message: "Bio Should Not Be Larger Than 1000 Character!" }),
+    .max(1000, { message: "Bio Should Not Be Larger Than 1000 Character!" }),
 });
