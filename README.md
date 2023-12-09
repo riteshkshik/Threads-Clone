@@ -39,7 +39,7 @@ Threads Clone is a social platform that allows users to create and interact with
 
 ## Usage
 
-Visit the live Threads Clone project [here](https://threads-clone-eta-liard.vercel.app/).
+Visit the live Threads Clone project [here](https://threads-clone-eta-liard.vercel.app/sign-in).
 
 ## Screenshots
 
