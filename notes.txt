@@ -1,6 +1,0 @@
-clerk -> used for authentication
-
-
-
-
-4:50
